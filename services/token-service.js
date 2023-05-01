@@ -16,10 +16,14 @@ class TokenService {
 
         if (tokenData) {
             tokenData.refreshToken = refreshToken;
-            return refreshToken.save();
+            return tokenData.save();
         }
 
         return await tokenModel.create({ user: userId, refreshToken });
+    }
+
+    async removeToken(refreshToken) {
+        return await tokenModel.deleteOne({ refreshToken });
     }
 }
 
