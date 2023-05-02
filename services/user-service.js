@@ -48,7 +48,7 @@ class UserService {
 
         const isPassEqual = await bcrypt.compare(password, candidate.password);
 
-        if(!isPassEqual) {
+        if (!isPassEqual) {
             throw ApiErrorBuilder.badRequest(`Email or password is wrong`);
         }
 
@@ -66,6 +66,34 @@ class UserService {
     async logout(refreshToken) {
         return await tokenService.removeToken(refreshToken);
     }
+
+    async refresh(refreshToken) {
+        if (!refreshToken) {
+            throw ApiErrorBuilder.unauthorizedError();
+        }
+        const userData = tokenService.validateRefreshToken(refreshToken);
+        const tokenFromDb = await tokenService.findToken(refreshToken);
+
+        if (!userData || !tokenFromDb) {
+            throw ApiErrorBuilder.unauthorizedError();
+        }
+
+        const candidate = await UserModel.findById(userData.id);
+        const userDto = new UserDto(candidate);
+
+        const tokens = tokenService.generateTokens({ ...userDto });
+        await tokenService.saveToken(userDto.id, tokens.refreshToken);
+
+        return {
+            ...tokens,
+            user: userDto
+        };
+    }
+
+    async getAllUsers() {
+        return await UserModel.find();
+    }
+
 }
 
 module.exports = new UserService();

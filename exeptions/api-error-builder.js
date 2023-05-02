@@ -1,7 +1,7 @@
 const ApiError = require('./api-error');
 
 module.exports = class ApiErrorBuilder {
-    static get unauthorizedError() {
+    static unauthorizedError() {
         return new ApiError(401, 'Unauthorized error');
     }
 
